@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>The Things Science Says About You</title>
+</head>
+<body>
+<p>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+                <ul class=flashes>
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+          {% endif %}
+        {% endwith %}
+</p>
+
+{% if png %}
+  <h2>Your scores and how you compare to others {{ term }}</h2>
+
+
+  <img src={{ png }} alt="where I stand">
+  
+
+<dl>
+  {% for table in tables %}
+    {{ table|safe }}
+  {% endfor %}
+
+</dl>
+
+{% else %}
+<h4>Some hints about the plots (that is, boxplots) </h4>
+<img src="{{ url_for('static', filename='example_results.png') }}">
+
+{% endif %}
+
+<h2>Search for something (use space to separate multiple keywords) </h2>
+<p>Example: "Brain structure", "Blood glucose levels", "Openness", etc.</p>
+<form method="post" action="/show_result">
+  <input type="text" name="term" value="{{ term }}">
+  <input type="submit" value="Search">
+</form>
+<p><a href="/download">Download your results in csv format</a></p>
+</body>
+</html>

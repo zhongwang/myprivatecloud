@@ -1,0 +1,13 @@
+atomicwrites
+Click
+cycler
+Flask
+gunicorn
+itsdangerous
+Jinja2
+kiwisolver
+MarkupSafe
+numpy
+pandas
+Werkzeug
+matplotlib

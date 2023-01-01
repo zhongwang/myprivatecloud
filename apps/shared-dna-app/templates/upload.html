@@ -1,0 +1,54 @@
+<!doctype html>
+<title>DIY Personal Genome Analysis</title>
+<h2> About this app</h2>
+<p>This app pools all the results from Genome-wide Association Studies (GWAS), ~ 2,700 as of Aug 2019, and match your genome against them. </p>
+<p>All disease-related traits have been ommitted on purpose. </p>
+<h4>Upload your genome to begin</h2>
+<p>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		<ul class=flashes>
+		{% for message in messages %}
+		  <li>{{ message }}</li>
+		{% endfor %}
+		</ul>
+	  {% endif %}
+	{% endwith %}
+</p>
+<form method="post" action="/" enctype="multipart/form-data">
+    <dl>
+		<p>Your Name: <input type="text" name="name1" autocomplete="off">
+		
+		<p> Upload a file in zip or gzip foramt and specify file type(required):<br>
+		<select name="format"> 
+			<option value="23andme" selected>23andme</option>
+			<option value="wegene">Wegene</option>
+			<option value="vcf" >vcf</option>
+			<option value="scores">Precomputed</option>
+		</select>
+		<input type="file" name="genome1" autocomplete="off" required>
+		</p>
+		<p> Select a subset of models to compute:<br>
+			<select name="models"> 
+				<option value="_fun" selected>Non Medical related traits</option>
+				<option value="_medical">Medical related traits</option>
+				<option value="">All traits</option>
+			</select>
+		</p>		
+		<p> Select a population you want to compare to:<br>
+			<select name="background"> 
+				<option value="pgp600" selected>Harvard PGP 23andme 600</option>
+				<option value="1kgenomes">1000 genomes project</option>
+			</select>
+		</p>	
+		<p><font color="red">Your genome file will be deleted as soon as analysis is finished. You will have to re-upload your genome for another session.</font></p>
+    </dl>
+    <p>
+		<input type="submit" value="Submit">
+	</p>
+</form>
+
+<h5>
+<p>By Zhong Wang</p>
+If this program keeps failing after you tried at least twice, it is probably because your genomes are too big. Sorry this free service poses some limits.</p> 
+<p>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. </p></h5>

@@ -1,0 +1,116 @@
+version: '3'
+
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+    environment:
+      TZ: 'US/Pacific' #this is the time zone
+    volumes:
+       - './etc-pihole/:/etc/pihole/'
+       - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    cap_add:
+      - NET_ADMIN
+    restart: unless-stopped
+
+  minidlna:
+    container_name: minidlna
+    hostname: minidlna
+    image: barbak/minidlna
+    restart: always
+    ports:
+      - "1900:1900/udp"
+      - "8200:8200/tcp"
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./minidlna/etc/default/minidlna:/etc/default/minidlna
+      - ./minidlna/etc/minidlna/minidlna.conf:/etc/minidlna.conf
+      - ./minidlna/var:/var
+      - data:/media:ro
+    environment:
+      - PUID=33
+      - PGID=33
+
+  calibre-web:
+    image: lscr.io/linuxserver/calibre-web:latest
+    container_name: calibre-web
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=US/Pacific
+      - DOCKER_MODS=linuxserver/mods:universal-calibre #optional
+      - OAUTHLIB_RELAX_TOKEN_SCOPE=1 #optional
+    volumes:
+      - /homezhwang/.calibre-web:/config
+      - /home/zhwang/Documents/E-Books:/books
+    ports:
+      - 8083:8083
+    restart: unless-stopped
+
+  db:
+    image: mariadb:10.5
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MARIADB_ROOT_PASSWORD=
+    env_file:
+      - db.env
+
+  redis:
+    image: redis:alpine
+    restart: always
+
+  app:
+    image: nextcloud:latest
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - nextcloud:/var/www/html
+      - data:/var/www/html/data
+    environment:
+      - VIRTUAL_HOST=
+      - LETSENCRYPT_HOST=
+      - LETSENCRYPT_EMAIL=
+      - MYSQL_HOST=db
+      - REDIS_HOST=redis
+    env_file:
+      - db.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - default
+
+  cron:
+    image: nextcloud:apache
+    restart: always
+    volumes:
+      - nextcloud:/var/www/html
+    entrypoint: /cron.sh
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  db:
+  nextcloud:
+  data:
+    driver_opts:
+      type: none
+      device: /var/www/nextcloud/data
+      o: bind
+networks:
+  default:
